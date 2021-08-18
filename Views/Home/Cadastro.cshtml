@@ -1,0 +1,267 @@
+﻿@{
+    ViewBag.Title = "Cadastro";
+}
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<link href="~/Content/Cadastro.css" rel="stylesheet" />
+<!------ Include the above in your HEAD tag ---------->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        var currentValue = 0;
+        function handleClick(myRadio) {
+
+            if (myRadio.value == 'C') {
+                document.getElementById('lblCPFCNPJ').innerHTML = 'CPF ' + '<h11>*</h11>';
+            }
+            else {
+                document.getElementById('lblCPFCNPJ').innerHTML = 'CNPJ ' + '<h11>*</h11>';
+            }
+            currentValue = myRadio.value;
+        }
+    </script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            function limpa_formulário_cep() {
+                // Limpa valores do formulário de cep.
+                $("#txtLogradouro").val("");
+                $("#txtBairro").val("");
+                $("#txtCidade").val("");
+                $("#txtEstado").val("");
+            }
+
+            //Quando o campo cep perde o foco.
+            $("#txtCep").blur(function () {
+
+                //Nova variável "cep" somente com dígitos.
+                var cep = $(this).val().replace(/\D/g, '');
+
+                //Verifica se campo cep possui valor informado.
+                if (cep != "") {
+
+                    //Expressão regular para validar o CEP.
+                    var validacep = /^[0-9]{8}$/;
+
+                    //Valida o formato do CEP.
+                    if (validacep.test(cep)) {
+
+                        //Preenche os campos com "..." enquanto consulta webservice.
+                        $("#txtLogradouro").val("...");
+                        $("#txtBairro").val("...");
+                        $("#txtCidade").val("...");
+                        $("#txtEstado").val("...");
+
+                        //Consulta o webservice viacep.com.br/
+                        $.getJSON("https://viacep.com.br/ws/" + cep + "/json/?callback=?", function (dados) {
+
+                            if (!("erro" in dados)) {
+                                //Atualiza os campos com os valores da consulta.
+                                $("#txtLogradouro").val(dados.logradouro);
+                                $("#txtBairro").val(dados.bairro);
+                                $("#txtCidade").val(dados.localidade);
+                                $("#txtEstado").val(dados.uf);
+                            } //end if.
+                            else {
+                                //CEP pesquisado não foi encontrado.
+                                limpa_formulário_cep();
+                                alert("CEP não encontrado.");
+                            }
+                        });
+                    } //end if.
+                    else {
+                        //cep é inválido.
+                        limpa_formulário_cep();
+                        alert("Formato de CEP inválido.");
+                    }
+                } //end if.
+                else {
+                    //cep sem valor, limpa formulário.
+                    limpa_formulário_cep();
+                }
+            });
+        });
+
+    </script>
+</head>
+<body>
+    <form class="form-horizontal">
+        <fieldset>
+            <div class="panel panel-primary">
+                <div class="panel-heading">Cadastro de Usuario</div>
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-11 control-label">
+                            <p class="help-block"><h11>*</h11> Campo Obrigatório </p>
+                        </div>
+                    </div>
+
+                    <!-- Text input-->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="Nome">Nome <h11>*</h11></label>
+                        <div class="col-md-8">
+                            <input id="txtNome" name="Nome" placeholder="" class="form-control input-md" required="" type="text">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="radios">Função <h11>*</h11></label>
+                        <div class="col-md-6">
+                            <label required="" class="radio-inline" for="radios-0">
+                                <input name="funcao" id="funcao" value="E" type="radio" required onchange="handleClick(this);">
+                                Transportadora
+                            </label>
+                            <label class="radio-inline" for="radios-1">
+                                <input name="funcao" id="funcao" value="C" type="radio" checked="checked" onchange="handleClick(this);">
+                                Cliente Pessoa Fisica
+                            </label>
+                            <label class="radio-inline" for="radios-1">
+                                <input name="funcao" id="funcao" value="C" type="radio" checked="checked" onchange="handleClick(this);">
+                                Cliente Pessoa Juridica
+                            </label>
+                        </div>
+                        <label class="col-md-2 control-label" for="Nome" id="lblCPFCNPJ">CPF <h11>*</h11></label>
+                        <div class="col-md-2">
+                            <input id="cpf" name="cpf" placeholder="Apenas números" class="form-control input-md" required="" type="text" maxlength="11" pattern="[0-9]+$">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="Nome">Nome da Empresa<h11>*</h11></label>
+                        <div class="col-md-8">
+                            <input id="txtNomeEmpresa" name="txtNomeEmpresa" class="form-control input-md" required="" type="text">
+                        </div>              
+                    </div>
+
+                    <!-- Prepended text-->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="prependedtext">Telefone <h11>*</h11></label>
+                        <div class="col-md-2">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="glyphicon glyphicon-earphone"></i></span>
+                                <input id="prependedtext" name="prependedtext" class="form-control" placeholder="XX XXXXX-XXXX" required="" type="text" maxlength="13" pattern="\[0-9]{2}\ [0-9]{4,6}-[0-9]{3,4}$"
+                                       OnKeyPress="formatar('## #####-####', this)">
+                            </div>
+                        </div>
+
+                        <label class="col-md-2 control-label" for="prependedtext">Celular</label>
+                        <div class="col-md-2">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="glyphicon glyphicon-earphone"></i></span>
+                                <input id="prependedtext" name="prependedtext" class="form-control" placeholder="XX XXXXX-XXXX" type="text" maxlength="13" pattern="\[0-9]{2}\ [0-9]{4,6}-[0-9]{3,4}$"
+                                       OnKeyPress="formatar('## #####-####', this)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prepended text-->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="prependedtext">Email <h11>*</h11></label>
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
+                                <input id="prependedtext" name="prependedtext" class="form-control" placeholder="email@email.com"  type="text" >
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Search input-->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="CEP">CEP <h11>*</h11></label>
+                        <div class="col-md-2">
+                            <input id="txtCep" name="cep" placeholder="Apenas números" class="form-control input-md" required="" value="" type="search" maxlength="8" pattern="[0-9]+$">
+                        </div>
+                    </div>
+
+                    <!-- Prepended text-->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="prependedtext">Endereço</label>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-addon">Rua</span>
+                                <input id="txtLogradouro" name="rua" class="form-control" placeholder="" required="" readonly="readonly" type="text">
+                            </div>
+
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group">
+                                <span class="input-group-addon">Nº <h11>*</h11></span>
+                                <input id="txtNumero" name="numero" class="form-control" placeholder="" required="" type="text">
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-addon">Bairro</span>
+                                <input id="txtBairro" name="bairro" class="form-control" placeholder="" required="" readonly="readonly" type="text">
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="prependedtext"></label>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-addon">Cidade</span>
+                                <input id="txtCidade" name="cidade" class="form-control" placeholder="" required="" readonly="readonly" type="text">
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="input-group">
+                                <span class="input-group-addon">Estado</span>
+                                <input id="txtEstado" name="estado" class="form-control" placeholder="" required="" readonly="readonly" type="text">
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div id="newpost">
+                        <div class="form-group">
+                            <div class="col-md-2 control-label">
+                                <h3>Dados Usuario</h3>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label" for="Nome">Nome do Usuario <h11>*</h11></label>
+                            <div class="col-md-8">
+                                <input id="txtUsuario" name="Nome" placeholder="" class="form-control input-md" required="" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-2 control-label" for="Nome">Senha do Usuario <h11>*</h11></label>
+                            <div class="col-md-8">
+                                <input id="txtSenha" name="Nome" placeholder="" class="form-control input-md" required="" type="text">
+                            </div>
+                        </div>                                        
+                    </div>
+
+                    <!-- Button (Double) -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="Cadastrar"></label>
+                        <div class="col-md-8">
+                            <button id="Cadastrar" name="Cadastrar" class="btn btn-success" type="Submit">Cadastrar</button>
+                            <button id="Cancelar" name="Cancelar" class="btn btn-danger" type="Reset">Cancelar</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </fieldset>
+    </form>
+
+</body>
+</html>
